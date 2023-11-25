@@ -1,0 +1,27 @@
+body {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+}
+
+html {
+    height: -webkit-fill-available;
+}
+
+main {
+    display: flex;
+    flex-wrap: nowrap;
+    height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.sidebar {
+    width: 280px;
+    /* align-self: stretch; */
+}
+
+.indent {
+    flex-basis: 32px;
+    flex-shrink: 0;
+    background-color: gray;
+}
