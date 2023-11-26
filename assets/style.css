@@ -19,9 +19,3 @@ main {
     width: 280px;
     /* align-self: stretch; */
 }
-
-.indent {
-    flex-basis: 32px;
-    flex-shrink: 0;
-    background-color: gray;
-}
