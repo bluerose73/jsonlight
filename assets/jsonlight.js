@@ -6,13 +6,18 @@ let demo = {
     "null": null
 };
 
+/*************************************
+ *              Renderer             *
+ *************************************/
+
 // JSON key-value pair -> HTML element
 // for a key-value pair in an object, key is a string.
 // for elements in a list, key is a number "index".
 // for the root-level value, key is null.
-function renderKV(key, value) {
-    kvRoot = newKV();
+function renderKV(key, loader) {
+    let kvRoot = newKV(loader);
     kvRoot.querySelector(".kv .kv-text").innerHTML = renderKey(key) + " : ";
+    value = loader.getValue()
     switch (typeof value) {
         case "string":
             console.log("string");
@@ -40,8 +45,9 @@ function renderKV(key, value) {
     return kvRoot;
 }
 
-function newKV() {
+function newKV(loader) {
     let kvRoot = document.createElement("div");
+    kvRoot.loader = loader;
     kvRoot.classList.add("kv-root", "d-flex", "flex-column", "gap-2", "mb-2");
     let kv = document.createElement("div");
     kv.classList.add("kv", "d-flex", "gap-2", "align-items-center");
@@ -86,8 +92,22 @@ function addCollapse(kvRoot, dataRef) {
     kvRoot.appendChild(collapseWrapper);
     
     collapseButton.addEventListener("click", (ev) => {
-        collapseWrapper = new bootstrap.Collapse(collapseWrapper);
+        new bootstrap.Collapse(collapseWrapper);
     });
+
+    collapseWrapper.addEventListener('show.bs.collapse', (ev) => {
+        ev.stopPropagation();
+        for (const childKV of kvRoot.loader.loadChild()) {
+            console.log(childKV);
+            childList.appendChild(
+                renderKV(...childKV)
+            )
+        }
+    });
+    collapseWrapper.addEventListener('hidden.bs.collapse', (ev) => {
+        ev.stopPropagation();
+        childList.replaceChildren();
+    })
 }
 
 // for a key-value pair in an object, key is a string.
@@ -97,7 +117,7 @@ function renderKey(key) {
     let keystr = "key error";
     if (key == null) keystr = "root";
     else if (typeof(key) == "number") {
-        keystr = "[" + string(number) + "]";
+        keystr = "[" + key.toString() + "]";
     }
     else if (typeof(key) == "string") {
         keystr = JSON.stringify(key);
@@ -122,15 +142,66 @@ function renderNull(kvRoot, jobj) {
 }
 
 function renderArray(kvRoot, jobj) {
-    kvRoot.querySelector(".kv .kv-text").innerHTML += "Array";
+    kvRoot.querySelector(".kv .kv-text").innerHTML += "[...]";
     addCollapse(kvRoot, jobj);
 }
 
 function renderObject(kvRoot, jobj) {
-    kvRoot.querySelector(".kv .kv-text").innerHTML += "Object";
+    kvRoot.querySelector(".kv .kv-text").innerHTML += "{...}";
     addCollapse(kvRoot, jobj);
 }
 
+/*************************************
+ *           Data Loader             *
+ *************************************/
 
-let rootJson = renderKV(null, demo);
+// base class for dataloaders
+// A dataloader corresponds to an array or an object,
+// and is responsible to load its children.
+class DataLoader {
+    constructor(value) {
+        this.value = value;
+    }
+
+    getValue() {
+        return this.value;
+    }
+    // Returns a list of (key, dataloader).
+    loadChild() {}
+}
+
+
+class WebDataLoader extends DataLoader {
+    constructor(value) {
+        super(value);
+    }
+
+    loadChild() {
+        if (this.value == null || typeof this.value != "object") return [];
+        let ret = []
+        if (Array.isArray(this.value)) {
+            for (const [i, v] of this.value.entries()) {
+                ret.push([i, new WebDataLoader(v)]);
+            }
+            return ret;
+        }
+        
+        // Object
+        for (const [k, v] of Object.entries(this.value)) {
+            ret.push([k, new WebDataLoader(v)]);
+        }
+        return ret;
+    }
+}
+
+class DesktopDataLoader extends DataLoader {
+
+}
+
+
+/*************************************
+ *           Entry Point             *
+ *************************************/
+
+let rootJson = renderKV(null, new WebDataLoader(demo));
 document.querySelector("#view").appendChild(rootJson);
