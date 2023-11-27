@@ -34,14 +34,15 @@ function renderKV(key, value) {
                 renderArray(kvRoot, value);
             }
             else {
-                renderDict(kvRoot, value);
+                renderObject(kvRoot, value);
             }
     }
+    return kvRoot;
 }
 
 function newKV() {
     let kvRoot = document.createElement("div");
-    kvRoot.classList.add("kv-root", "d-flex", "flex-column", "gap-2");
+    kvRoot.classList.add("kv-root", "d-flex", "flex-column", "gap-2", "mb-2");
     let kv = document.createElement("div");
     kv.classList.add("kv", "d-flex", "gap-2", "align-items-center");
     let kvText = document.createElement("div");
@@ -51,13 +52,25 @@ function newKV() {
     return kvRoot;
 }
 
-function addCollapse(kvRoot) {
-    let kv = kvRoot.querySelector(".kv");
-    
+function newCollapseButton() {
     let collapseButton = document.createElement("button");
     collapseButton.classList.add("btn", "btn-light", "btn-sm");
     collapseButton.setAttribute("data-bs-toggle", "collapse");
-    kv.insertBefore(collapseButton);
+    collapseButton.setAttribute("type", "button");
+    collapseButton.innerHTML = "+";
+    return collapseButton;
+}
+
+// Adds a collapse button and a collapsed child list to kvRoot.
+// The child list is initially empty,
+// When the button is hit, the child list is rendered from dataRef
+function addCollapse(kvRoot, dataRef) {
+    kvRoot.dataRef = dataRef
+
+    let kv = kvRoot.querySelector(".kv");
+    
+    let collapseButton = newCollapseButton();
+    kv.insertBefore(collapseButton, kv.querySelector(".kv-text"));
     
     let collapseWrapper = document.createElement("div");
     collapseWrapper.classList.add("collapse");
@@ -92,4 +105,32 @@ function renderKey(key) {
     return keystr;
 }
 
-renderKV(null, demo);
+function renderString(kvRoot, jobj) {
+    kvRoot.querySelector(".kv .kv-text").innerHTML += JSON.stringify(jobj);
+}
+
+function renderNumber(kvRoot, jobj) {
+    kvRoot.querySelector(".kv .kv-text").innerHTML += JSON.stringify(jobj);
+}
+
+function renderBool(kvRoot, jobj) {
+    kvRoot.querySelector(".kv .kv-text").innerHTML += JSON.stringify(jobj);
+}
+
+function renderNull(kvRoot, jobj) {
+    kvRoot.querySelector(".kv .kv-text").innerHTML += JSON.stringify(jobj);
+}
+
+function renderArray(kvRoot, jobj) {
+    kvRoot.querySelector(".kv .kv-text").innerHTML += "Array";
+    addCollapse(kvRoot, jobj);
+}
+
+function renderObject(kvRoot, jobj) {
+    kvRoot.querySelector(".kv .kv-text").innerHTML += "Object";
+    addCollapse(kvRoot, jobj);
+}
+
+
+let rootJson = renderKV(null, demo);
+document.querySelector("#view").appendChild(rootJson);
