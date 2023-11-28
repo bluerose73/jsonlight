@@ -1,9 +1,21 @@
+let long_demo = {
+    "string": "This is a string value\nThis the second line",
+    "number": 123.456,
+    "list": ["elem1", "elem2", "elem3", "elem4", "elem5", "elem6",
+             "elem7", "elem8", "elem9", "elem10", "elem11", "elem12",
+             "elem13", "elem14", "elem15", "elem16", "elem17", "elem18"],
+    "boolean": true,
+    "null": null
+};
+
 let demo = {
     "string": "This is a string value\nThis the second line",
     "number": 123.456,
     "list": ["elem1", "elem2"],
     "boolean": true,
-    "null": null
+    "null": null,
+    "long-demo": long_demo,
+    "long-string": "Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long "
 };
 
 /*************************************
@@ -16,19 +28,17 @@ let demo = {
 // for the root-level value, key is null.
 function renderKV(key, loader) {
     let kvRoot = newKV(loader);
-    kvRoot.querySelector(".kv .kv-text").innerHTML = renderKey(key) + " : ";
+    let kvText = kvRoot.querySelector(".kv .kv-text");
+    kvText.innerHTML = renderKey(key) + ": ";
     value = loader.getValue()
     switch (typeof value) {
         case "string":
-            console.log("string");
             renderString(kvRoot, value);
             break;
         case "number":
-            console.log("number");
             renderNumber(kvRoot, value);
             break;
         case "boolean":
-            console.log("boolean");
             renderBool(kvRoot, value);
             break;
         case "object":
@@ -76,7 +86,8 @@ function addCollapse(kvRoot, dataRef) {
     let kv = kvRoot.querySelector(".kv");
     
     let collapseButton = newCollapseButton();
-    kv.insertBefore(collapseButton, kv.querySelector(".kv-text"));
+    // kv.insertBefore(collapseButton, kv.querySelector(".kv-text"));
+    kv.appendChild(collapseButton);
     
     let collapseWrapper = document.createElement("div");
     collapseWrapper.classList.add("collapse");
@@ -92,21 +103,26 @@ function addCollapse(kvRoot, dataRef) {
     kvRoot.appendChild(collapseWrapper);
     
     collapseButton.addEventListener("click", (ev) => {
-        new bootstrap.Collapse(collapseWrapper);
+        if (!collapseWrapper.classList.contains("collapsing")) {
+            new bootstrap.Collapse(collapseWrapper);
+        }
     });
 
     collapseWrapper.addEventListener('show.bs.collapse', (ev) => {
+        console.log("show event received");
         ev.stopPropagation();
         for (const childKV of kvRoot.loader.loadChild()) {
-            console.log(childKV);
             childList.appendChild(
                 renderKV(...childKV)
             )
         }
+        collapseButton.innerHTML = "-";
     });
     collapseWrapper.addEventListener('hidden.bs.collapse', (ev) => {
+        console.log("hide event received");
         ev.stopPropagation();
         childList.replaceChildren();
+        collapseButton.innerHTML = "+";
     })
 }
 
@@ -122,7 +138,7 @@ function renderKey(key) {
     else if (typeof(key) == "string") {
         keystr = JSON.stringify(key);
     }
-    return keystr;
+    return '<span class="text-primary">' + keystr + "</span>";
 }
 
 function renderString(kvRoot, jobj) {
