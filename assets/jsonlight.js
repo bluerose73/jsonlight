@@ -58,9 +58,9 @@ function renderKV(key, loader) {
 function newKV(loader) {
     let kvRoot = document.createElement("div");
     kvRoot.loader = loader;
-    kvRoot.classList.add("kv-root", "d-flex", "flex-column", "gap-2", "mb-2");
+    kvRoot.classList.add("kv-root", "d-flex", "flex-column");
     let kv = document.createElement("div");
-    kv.classList.add("kv", "d-flex", "gap-2", "align-items-center");
+    kv.classList.add("kv", "d-flex", "gap-2", "align-items-center", "mb-1");
     let kvText = document.createElement("div");
     kvText.classList.add("kv-text");
     kv.appendChild(kvText);
@@ -70,8 +70,8 @@ function newKV(loader) {
 
 function newCollapseButton() {
     let collapseButton = document.createElement("button");
-    collapseButton.classList.add("btn", "btn-light", "btn-sm");
-    collapseButton.setAttribute("data-bs-toggle", "collapse");
+    collapseButton.classList.add("btn", "btn-light", "btn-sm", "pt-0", "pb-0");
+    collapseButton.setAttribute("data-bs-toggle", "button");
     collapseButton.setAttribute("type", "button");
     collapseButton.innerHTML = "+";
     return collapseButton;
@@ -96,7 +96,7 @@ function addCollapse(kvRoot, dataRef) {
     let indent = document.createElement("div");
     indent.classList.add("indent", "border-end", "pe-5", "flex-shrink-0");
     let childList = document.createElement("div");
-    childList.classList.add("child-list", "d-flex", "flex-column", "gap-2");
+    childList.classList.add("child-list", "d-flex", "flex-column");
     childBlock.appendChild(indent);
     childBlock.appendChild(childList);
     collapseWrapper.appendChild(childBlock);
@@ -143,6 +143,7 @@ function renderKey(key) {
 
 function renderString(kvRoot, jobj) {
     kvRoot.querySelector(".kv .kv-text").innerHTML += JSON.stringify(jobj);
+    // addViewRaw(kvRoot);
 }
 
 function renderNumber(kvRoot, jobj) {
