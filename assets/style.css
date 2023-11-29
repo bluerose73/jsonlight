@@ -23,13 +23,13 @@ main {
 .collapseButton {
     position: relative;
     right: 40px;
-    margin-right: -40px;
+    margin-right: calc(-1em - 18px);
     align-self: flex-start;
 }
 
 .viewRawButton {
     position: relative;
     right: 40px;
-    margin-right: -40px;
+    margin-right: calc(-1em - 18px);
     align-self: flex-start;
 }

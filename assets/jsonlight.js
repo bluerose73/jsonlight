@@ -230,4 +230,6 @@ class DesktopDataLoader extends DataLoader {
 
 let rootJson = renderKV(null, new WebDataLoader(demo));
 document.querySelector("#view").appendChild(rootJson);
-rootJson.querySelector(".collapseButton").click();
+let rootButton = rootJson.querySelector(".collapseButton");
+rootButton.style.display = "none";
+rootButton.click();
