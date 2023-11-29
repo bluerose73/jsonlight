@@ -29,7 +29,7 @@ let demo = {
 function renderKV(key, loader) {
     let kvRoot = newKV(loader);
     let kvText = kvRoot.querySelector(".kv .kv-text");
-    kvText.innerHTML = renderKey(key) + ": ";
+    kvText.innerHTML = renderKey(key);
     value = loader.getValue()
     switch (typeof value) {
         case "string":
@@ -68,13 +68,13 @@ function newKV(loader) {
     return kvRoot;
 }
 
-function newCollapseButton() {
-    let collapseButton = document.createElement("button");
-    collapseButton.classList.add("btn", "btn-light", "btn-sm", "pt-0", "pb-0");
-    collapseButton.setAttribute("data-bs-toggle", "button");
-    collapseButton.setAttribute("type", "button");
-    collapseButton.innerHTML = "+";
-    return collapseButton;
+function newToggleButton(text) {
+    let toggleButton = document.createElement("button");
+    toggleButton.classList.add("btn", "btn-light", "btn-sm", "pt-0", "pb-0");
+    toggleButton.setAttribute("data-bs-toggle", "button");
+    toggleButton.setAttribute("type", "button");
+    toggleButton.innerHTML = text;
+    return toggleButton;
 }
 
 // Adds a collapse button and a collapsed child list to kvRoot.
@@ -85,9 +85,9 @@ function addCollapse(kvRoot, dataRef) {
 
     let kv = kvRoot.querySelector(".kv");
     
-    let collapseButton = newCollapseButton();
-    // kv.insertBefore(collapseButton, kv.querySelector(".kv-text"));
-    kv.appendChild(collapseButton);
+    let collapseButton = newToggleButton("+");
+    collapseButton.classList.add("collapseButton");
+    kv.insertBefore(collapseButton, kv.firstChild);
     
     let collapseWrapper = document.createElement("div");
     collapseWrapper.classList.add("collapse");
@@ -138,12 +138,20 @@ function renderKey(key) {
     else if (typeof(key) == "string") {
         keystr = JSON.stringify(key);
     }
-    return '<span class="text-primary">' + keystr + "</span>";
+    return '<span class="text-primary">' + keystr + "</span>: ";
+}
+
+function addViewRaw(kvRoot) {
+    let viewRawButton = newToggleButton("R");
+    viewRawButton.classList.add("viewRawButton");
+    
+    let kv = kvRoot.querySelector(".kv");
+    kv.insertBefore(viewRawButton, kv.firstChild);
 }
 
 function renderString(kvRoot, jobj) {
+    addViewRaw(kvRoot);
     kvRoot.querySelector(".kv .kv-text").innerHTML += JSON.stringify(jobj);
-    // addViewRaw(kvRoot);
 }
 
 function renderNumber(kvRoot, jobj) {
@@ -222,3 +230,4 @@ class DesktopDataLoader extends DataLoader {
 
 let rootJson = renderKV(null, new WebDataLoader(demo));
 document.querySelector("#view").appendChild(rootJson);
+rootJson.querySelector(".collapseButton").click();

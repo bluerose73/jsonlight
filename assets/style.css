@@ -16,6 +16,20 @@ main {
 }
 
 .sidebar {
-    width: 256px;
+    width: 270px;
     /* align-self: stretch; */
+}
+
+.collapseButton {
+    position: relative;
+    right: 40px;
+    margin-right: -40px;
+    align-self: flex-start;
+}
+
+.viewRawButton {
+    position: relative;
+    right: 40px;
+    margin-right: -40px;
+    align-self: flex-start;
 }
