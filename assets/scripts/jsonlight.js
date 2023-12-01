@@ -246,7 +246,7 @@ class DataLoader {
     }
 
     loadString() {}
-    loadFile() {}
+    async loadFile() {}
     loadObject(obj) {
         this.value = obj;
     }
@@ -271,6 +271,22 @@ class WebDataLoader extends DataLoader {
         }
         catch (exception) {
             return false;
+        }
+    }
+
+    async loadFile(file) {
+        if (file.name.endsWith(".json") || file.name.endsWith(".geojson"))
+            return this.loadString(await file.text());
+        if (file.name.endsWith(".jsonl")) {
+            let fileText = await file.text();
+            let lines = fileText.split(/[\r\n]+/);
+            try {
+                this.value = lines.filter(line => line).map((line) => JSON.parse(line));
+                return true;
+            }
+            catch (exception) {
+                return false;
+            }
         }
     }
 
@@ -315,7 +331,6 @@ function newDataLoader() {
     }
 }
 
-
 function renderJSON(loader) {
     let rootJson = renderKV(null, loader);
     document.querySelector("#view").appendChild(rootJson);
@@ -345,6 +360,18 @@ function renderJsonStr(jsonStr) {
     renderJSON(loader);
 }
 
+async function renderJsonFile(file) {
+    document.querySelector("#view").replaceChildren();
+
+    let loader = newDataLoader();
+    let success = await loader.loadFile(file);
+    if (!success) {
+        displayParseError();
+        return;
+    }
+    renderJSON(loader);
+}
+
 let loader = new WebDataLoader();
 loader.loadObject(demo);
 renderJSON(loader);
@@ -352,4 +379,12 @@ renderJSON(loader);
 let pasteArea = document.querySelector("#paste");
 pasteArea.addEventListener("change", (ev) => {
     renderJsonStr(pasteArea.value);
+});
+if (pasteArea.value != "") {
+    renderJsonStr(pasteArea.value);
+}
+
+let filePicker = document.querySelector("#filepicker");
+filePicker.addEventListener("change", (ev) => {
+    renderJsonFile(filePicker.files[0]);
 })
