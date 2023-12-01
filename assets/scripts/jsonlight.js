@@ -118,7 +118,7 @@ function addCollapse(kvRoot, dataRef) {
 
     collapseWrapper.addEventListener('show.bs.collapse', (ev) => {
         ev.stopPropagation();
-        for (const childKV of kvRoot.loader.loadChild()) {
+        for (const childKV of kvRoot.loader.getChild()) {
             childList.appendChild(
                 renderKV(...childKV)
             )
@@ -231,36 +231,56 @@ function renderObject(kvRoot, jobj) {
 // A dataloader corresponds to an array or an object,
 // and is responsible to load its children.
 class DataLoader {
-    constructor(value) {
-        this.value = value;
+    constructor() {
+        this.value = undefined;
     }
 
+    loadString() {}
+    loadFile() {}
+    loadObject(obj) {
+        this.value = obj;
+    }
     getValue() {
         return this.value;
     }
     // Returns a list of (key, dataloader).
-    loadChild() {}
+    getChild() {}
 }
 
 
 class WebDataLoader extends DataLoader {
-    constructor(value) {
-        super(value);
+    constructor() {
+        super();
     }
 
-    loadChild() {
+    loadString(jsonStr) {
+        console.log(jsonStr);
+        try {
+            this.value = JSON.parse(jsonStr);
+            return true;
+        }
+        catch (exception) {
+            return false;
+        }
+    }
+
+    getChild() {
         if (this.value == null || typeof this.value != "object") return [];
         let ret = []
         if (Array.isArray(this.value)) {
             for (const [i, v] of this.value.entries()) {
-                ret.push([i, new WebDataLoader(v)]);
+                let childLoader = new WebDataLoader();
+                childLoader.loadObject(v);
+                ret.push([i, childLoader]);
             }
             return ret;
         }
         
         // Object
         for (const [k, v] of Object.entries(this.value)) {
-            ret.push([k, new WebDataLoader(v)]);
+            let childLoader = new WebDataLoader();
+            childLoader.loadObject(v);
+            ret.push([k, childLoader]);
         }
         return ret;
     }
@@ -272,11 +292,52 @@ class DesktopDataLoader extends DataLoader {
 
 
 /*************************************
- *           Entry Point             *
+ *           Controls                *
  *************************************/
 
-let rootJson = renderKV(null, new WebDataLoader(demo));
-document.querySelector("#view").appendChild(rootJson);
-let rootButton = rootJson.querySelector(".collapse-button");
-rootButton.style.display = "none";
-rootButton.click();
+let g_platform = "web";
+function newDataLoader() {
+    if (g_platform == "web") {
+        return new WebDataLoader();
+    }
+    else {
+        return new DesktopDataLoader();
+    }
+}
+
+
+function renderJSON(loader) {
+    let rootJson = renderKV(null, loader);
+    document.querySelector("#view").appendChild(rootJson);
+    let rootButton = rootJson.querySelector(".collapse-button");
+    rootButton.style.display = "none";
+    rootButton.click();
+}
+
+function displayParseError() {
+    let errorMsg = document.createElement("div");
+    errorMsg.classList.add("text-danger");
+    errorMsg.innerText = "Syntax Error";
+    document.querySelector("#view").appendChild(errorMsg);
+}
+
+function renderJsonStr(jsonStr) {
+    document.querySelector("#view").replaceChildren();
+
+    let loader = newDataLoader();
+    let success = loader.loadString(jsonStr);
+    if (!success) {
+        displayParseError();
+        return;
+    }
+    renderJSON(loader);
+}
+
+let loader = new WebDataLoader();
+loader.loadObject(demo);
+renderJSON(loader);
+
+let pasteArea = document.querySelector("#paste");
+pasteArea.addEventListener("change", (ev) => {
+    renderJsonStr(pasteArea.value);
+})
