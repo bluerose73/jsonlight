@@ -20,16 +20,14 @@ main {
     /* align-self: stretch; */
 }
 
-.collapseButton {
+.toggle-button {
     position: relative;
-    right: 40px;
-    margin-right: calc(-1em - 18px);
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+    width: 1.5rem;
+    right: 2.5rem;
+    margin-right: -1.5rem;
     align-self: flex-start;
-}
-
-.viewRawButton {
-    position: relative;
-    right: 40px;
-    margin-right: calc(-1em - 18px);
-    align-self: flex-start;
+    flex-shrink: 0;
 }

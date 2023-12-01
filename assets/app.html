@@ -4,9 +4,8 @@
 <head>
   <title>JSON Light</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-  <link rel="stylesheet" href="style.css">
+  <link href="styles/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles/jsonlight.css">
 </head>
 
 <body>
@@ -37,32 +36,10 @@
     </div>
 
     <div class="container-fluid p-3 overflow-y-auto font-monospace" id="view">
-      <div class="kv-root d-flex flex-column gap-2 mb-2">
-        <div class="kv d-flex gap-2 align-items-center">
-          <button type="button" class="btn btn-light btn-sm" data-bs-toggle="collapse"
-            data-bs-target="#test-collapse">+</button>
-          <div class="kv-text">key : Object</div>
-        </div>
-        <div class="collapse" id="test-collapse">
-          <div class="child-block d-flex gap-2">
-            <div class="indent border-end pe-5 flex-shrink-0">
-            </div>
-            <div class="child-list d-flex flex-column gap-2">
-              <div class="kv">
-                <div class="kv-root">
-                  key-string : "This is a string"
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-      crossorigin="anonymous"></script>
-    <script src="jsonlight.js"></script>
+    <script src="scripts/bootstrap.bundle.min.js"></script>
+    <script src="scripts/jsonlight.js"></script>
   </main>
 </body>
 

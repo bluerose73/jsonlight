@@ -68,7 +68,7 @@ function newKV(loader) {
     kvRoot.loader = loader;
     kvRoot.classList.add("kv-root", "d-flex", "flex-column");
     let kv = document.createElement("div");
-    kv.classList.add("kv", "d-flex", "gap-2", "align-items-center", "mb-1");
+    kv.classList.add("kv", "d-flex", "align-items-center", "mb-1");
     let kvText = document.createElement("div");
     kvText.classList.add("kv-text");
     kv.appendChild(kvText);
@@ -78,7 +78,7 @@ function newKV(loader) {
 
 function newToggleButton(text) {
     let toggleButton = document.createElement("button");
-    toggleButton.classList.add("btn", "btn-light", "btn-sm", "pt-0", "pb-0");
+    toggleButton.classList.add("btn", "btn-light", "btn-sm");
     toggleButton.setAttribute("data-bs-toggle", "button");
     toggleButton.setAttribute("type", "button");
     toggleButton.innerHTML = text;
@@ -94,7 +94,7 @@ function addCollapse(kvRoot, dataRef) {
     let kv = kvRoot.querySelector(".kv");
     
     let collapseButton = newToggleButton("+");
-    collapseButton.classList.add("collapseButton");
+    collapseButton.classList.add("toggle-button", "collapse-button");
     kv.insertBefore(collapseButton, kv.firstChild);
     
     let collapseWrapper = document.createElement("div");
@@ -117,7 +117,6 @@ function addCollapse(kvRoot, dataRef) {
     });
 
     collapseWrapper.addEventListener('show.bs.collapse', (ev) => {
-        console.log("show event received");
         ev.stopPropagation();
         for (const childKV of kvRoot.loader.loadChild()) {
             childList.appendChild(
@@ -127,7 +126,6 @@ function addCollapse(kvRoot, dataRef) {
         collapseButton.innerHTML = "-";
     });
     collapseWrapper.addEventListener('hidden.bs.collapse', (ev) => {
-        console.log("hide event received");
         ev.stopPropagation();
         childList.replaceChildren();
         collapseButton.innerHTML = "+";
@@ -154,7 +152,7 @@ function renderKey(key) {
 
 function addViewRaw(kvRoot) {
     let viewRawButton = newToggleButton("R");
-    viewRawButton.classList.add("viewRawButton");
+    viewRawButton.classList.add("toggle-button", "view-raw-button");
     viewRawButton.addEventListener("click", (ev) => {
         if (viewRawButton.classList.contains("active")) {
             renderRawString(kvRoot);
@@ -279,6 +277,6 @@ class DesktopDataLoader extends DataLoader {
 
 let rootJson = renderKV(null, new WebDataLoader(demo));
 document.querySelector("#view").appendChild(rootJson);
-let rootButton = rootJson.querySelector(".collapseButton");
+let rootButton = rootJson.querySelector(".collapse-button");
 rootButton.style.display = "none";
 rootButton.click();
