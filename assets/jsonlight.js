@@ -9,7 +9,8 @@ let long_demo = {
 };
 
 let demo = {
-    "string": "This is a string value\nThis the second line",
+    "string": "This is a string value\nThis the second line\n" +
+              "Test HTML tags: <span> content </span>\n",
     "number": 123.456,
     "list": ["elem1", "elem2"],
     "boolean": true,
@@ -29,29 +30,36 @@ let demo = {
 function renderKV(key, loader) {
     let kvRoot = newKV(loader);
     let kvText = kvRoot.querySelector(".kv .kv-text");
-    kvText.innerHTML = renderKey(key);
+    kvText.appendChild(renderKey(key));
+
+    let colonSpan = document.createElement("span");
+    colonSpan.innerText = ": ";
+    kvText.appendChild(colonSpan);
+
     value = loader.getValue()
+    let valueSpan = null;
     switch (typeof value) {
         case "string":
-            renderString(kvRoot, value);
+            valueSpan = renderString(kvRoot, value);
             break;
         case "number":
-            renderNumber(kvRoot, value);
+            valueSpan = renderNumber(kvRoot, value);
             break;
         case "boolean":
-            renderBool(kvRoot, value);
+            valueSpan = renderBool(kvRoot, value);
             break;
         case "object":
             if (value == null) {
-                renderNull(kvRoot, value);
+                valueSpan = renderNull(kvRoot, value);
             }
             else if (Array.isArray(value)) {
-                renderArray(kvRoot, value);
+                valueSpan = renderArray(kvRoot, value);
             }
             else {
-                renderObject(kvRoot, value);
+                valueSpan = renderObject(kvRoot, value);
             }
     }
+    kvText.appendChild(valueSpan);
     return kvRoot;
 }
 
@@ -138,42 +146,83 @@ function renderKey(key) {
     else if (typeof(key) == "string") {
         keystr = JSON.stringify(key);
     }
-    return '<span class="text-primary">' + keystr + "</span>: ";
+    let keySpan = document.createElement("span");
+    keySpan.classList.add("text-primary");
+    keySpan.innerText = keystr;
+    return keySpan;
 }
 
 function addViewRaw(kvRoot) {
     let viewRawButton = newToggleButton("R");
     viewRawButton.classList.add("viewRawButton");
+    viewRawButton.addEventListener("click", (ev) => {
+        if (viewRawButton.classList.contains("active")) {
+            renderRawString(kvRoot);
+        }
+        else {
+            cancelRawString(kvRoot);
+        }
+    });
     
     let kv = kvRoot.querySelector(".kv");
     kv.insertBefore(viewRawButton, kv.firstChild);
 }
 
+function renderRawString(kvRoot) {
+    let jsonValue = kvRoot.querySelector(".kv .kv-text .json-value");
+    jsonValue.style.display = "none";
+
+    let rawString = document.createElement("div");
+    rawString.classList.add("raw-string", "mb-1");
+    rawString.innerText = kvRoot.loader.getValue();
+    kvRoot.appendChild(rawString);
+}
+
+function cancelRawString(kvRoot) {
+    let rawString = kvRoot.querySelector(".raw-string");
+    kvRoot.removeChild(rawString);
+    let jsonValue = kvRoot.querySelector(".kv .kv-text .json-value");
+    jsonValue.style.display = "initial";
+}
+
+function renderStringify(jobj) {
+    let valueSpan = document.createElement("span");
+    valueSpan.classList.add("json-value");
+    valueSpan.textContent = JSON.stringify(jobj);
+    return valueSpan;
+}
+
 function renderString(kvRoot, jobj) {
     addViewRaw(kvRoot);
-    kvRoot.querySelector(".kv .kv-text").innerHTML += JSON.stringify(jobj);
+    return renderStringify(jobj);
 }
 
 function renderNumber(kvRoot, jobj) {
-    kvRoot.querySelector(".kv .kv-text").innerHTML += JSON.stringify(jobj);
+    return renderStringify(jobj);
 }
 
 function renderBool(kvRoot, jobj) {
-    kvRoot.querySelector(".kv .kv-text").innerHTML += JSON.stringify(jobj);
+    return renderStringify(jobj);
 }
 
 function renderNull(kvRoot, jobj) {
-    kvRoot.querySelector(".kv .kv-text").innerHTML += JSON.stringify(jobj);
+    return renderStringify(jobj);
 }
 
 function renderArray(kvRoot, jobj) {
-    kvRoot.querySelector(".kv .kv-text").innerHTML += "[...]";
     addCollapse(kvRoot, jobj);
+    let valueSpan = document.createElement("span");
+    valueSpan.classList.add("json-value");
+    valueSpan.textContent = "[...]";
+    return valueSpan;
 }
 
 function renderObject(kvRoot, jobj) {
-    kvRoot.querySelector(".kv .kv-text").innerHTML += "{...}";
     addCollapse(kvRoot, jobj);
+    let valueSpan = document.createElement("span");
+    valueSpan.classList.add("json-value");
+    valueSpan.textContent = "{...}"
+    return valueSpan;
 }
 
 /*************************************
