@@ -16,6 +16,8 @@ let demo = {
     "boolean": true,
     "null": null,
     "long-demo": long_demo,
+    "empty-list": [],
+    "empty-object": {},
     "long-string": "Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long "
 };
 
@@ -36,7 +38,7 @@ function renderKV(key, loader) {
     colonSpan.innerText = ": ";
     kvText.appendChild(colonSpan);
 
-    value = loader.getValue()
+    value = loader.getValue();
     let valueSpan = null;
     switch (typeof value) {
         case "string":
@@ -208,17 +210,25 @@ function renderNull(kvRoot, jobj) {
 }
 
 function renderArray(kvRoot, jobj) {
-    addCollapse(kvRoot, jobj);
     let valueSpan = document.createElement("span");
     valueSpan.classList.add("json-value");
+    if (jobj.length == 0) {
+        valueSpan.textContent = "[]";
+        return valueSpan;
+    }
+    addCollapse(kvRoot, jobj);
     valueSpan.textContent = "[...]";
     return valueSpan;
 }
 
 function renderObject(kvRoot, jobj) {
-    addCollapse(kvRoot, jobj);
     let valueSpan = document.createElement("span");
     valueSpan.classList.add("json-value");
+    if (Object.keys(jobj).length == 0) {
+        valueSpan.textContent = "{}"
+        return valueSpan;
+    }
+    addCollapse(kvRoot, jobj);
     valueSpan.textContent = "{...}"
     return valueSpan;
 }
@@ -310,8 +320,10 @@ function renderJSON(loader) {
     let rootJson = renderKV(null, loader);
     document.querySelector("#view").appendChild(rootJson);
     let rootButton = rootJson.querySelector(".collapse-button");
-    rootButton.style.display = "none";
-    rootButton.click();
+    if (rootButton) {
+        rootButton.style.display = "none";
+        rootButton.click();
+    }
 }
 
 function displayParseError() {
