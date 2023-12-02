@@ -372,9 +372,9 @@ async function renderJsonFile(file) {
     renderJSON(loader);
 }
 
-let loader = new WebDataLoader();
-loader.loadObject(demo);
-renderJSON(loader);
+// let loader = new WebDataLoader();
+// loader.loadObject(demo);
+// renderJSON(loader);
 
 let pasteArea = document.querySelector("#paste");
 pasteArea.addEventListener("change", (ev) => {
