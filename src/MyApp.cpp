@@ -7,7 +7,9 @@ MyApp::MyApp() {
   ///
   /// Create our main App instance.
   ///
-  app_ = App::Create();
+  ultralight::Settings settings;
+  settings.file_system_path = "./docs";
+  app_ = App::Create(settings);
 
   ///
   /// Create a resizable window by passing by OR'ing our window flags with
