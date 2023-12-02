@@ -84,7 +84,7 @@ MACRO(ADD_APP source_list)
 
   # Copy assets to assets path
   add_custom_command(TARGET ${APP_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/assets/" "${ASSETS_PATH}")
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/docs/" "${ASSETS_PATH}")
 
   if(${ENABLE_INSPECTOR})
     # Copy inspector to assets directory

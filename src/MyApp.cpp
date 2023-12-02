@@ -7,9 +7,7 @@ MyApp::MyApp() {
   ///
   /// Create our main App instance.
   ///
-  ultralight::Settings settings;
-  settings.file_system_path = "./docs";
-  app_ = App::Create(settings);
+  app_ = App::Create();
 
   ///
   /// Create a resizable window by passing by OR'ing our window flags with
@@ -32,7 +30,7 @@ MyApp::MyApp() {
   ///
   /// Load a page into our overlay's View
   ///
-  overlay_->view()->LoadURL("file:///app.html");
+  overlay_->view()->LoadURL("file:///index.html");
 
   ///
   /// Register our MyApp instance as an AppListener so we can handle the
