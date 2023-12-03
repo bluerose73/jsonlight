@@ -68,7 +68,7 @@ function renderKV(key, loader) {
 function newKV(loader) {
     let kvRoot = document.createElement("div");
     kvRoot.loader = loader;
-    kvRoot.classList.add("kv-root", "d-flex", "flex-column");
+    kvRoot.classList.add("kv-root");
     let kv = document.createElement("div");
     kv.classList.add("kv", "d-flex", "align-items-center", "mb-1");
     let kvText = document.createElement("div");
@@ -106,7 +106,7 @@ function addCollapse(kvRoot, dataRef) {
     let indent = document.createElement("div");
     indent.classList.add("indent", "border-end", "pe-5", "flex-shrink-0");
     let childList = document.createElement("div");
-    childList.classList.add("child-list", "d-flex", "flex-column");
+    childList.classList.add("child-list");
     childBlock.appendChild(indent);
     childBlock.appendChild(childList);
     collapseWrapper.appendChild(childBlock);
