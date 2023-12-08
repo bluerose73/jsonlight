@@ -172,7 +172,7 @@ function renderRawString(kvRoot) {
     let jsonValue = kvRoot.querySelector(".kv .kv-text .json-value");
     jsonValue.style.display = "none";
 
-    let rawString = document.createElement("div");
+    let rawString = document.createElement("pre");
     rawString.classList.add("raw-string", "mb-1");
     rawString.innerText = kvRoot.loader.getValue();
     kvRoot.appendChild(rawString);
