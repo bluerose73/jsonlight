@@ -387,4 +387,5 @@ if (pasteArea.value != "") {
 let filePicker = document.querySelector("#filepicker");
 filePicker.addEventListener("change", (ev) => {
     renderJsonFile(filePicker.files[0]);
+    filePicker.value = "";
 })
