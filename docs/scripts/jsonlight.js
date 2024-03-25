@@ -21,6 +21,13 @@ let demo = {
     "long-string": "Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long Very Long "
 };
 
+let welcome = {
+    "title": "JSON Light",
+    "description": "A JSON viewer that displays multi-line strings in its raw format!",
+    "tip": "Click the R (view raw) button in the following line",
+    "banner": "\n       _  _____  ____  _   _   _      _       _     _   \n      | |/ ____|/ __ \\| \\ | | | |    (_)     | |   | |  \n      | | (___ | |  | |  \\| | | |     _  __ _| |__ | |_ \n  _   | |\\___ \\| |  | | . ` | | |    | |/ _` | '_ \\| __|\n | |__| |____) | |__| | |\\  | | |____| | (_| | | | | |_ \n  \\____/|_____/ \\____/|_| \\_| |______|_|\\__, |_| |_|\\__|\n                                         __/ |          \n                                        |___/           \n"
+}
+
 /*************************************
  *              Renderer             *
  *************************************/
@@ -372,10 +379,6 @@ async function renderJsonFile(file) {
     renderJSON(loader);
 }
 
-// let loader = new WebDataLoader();
-// loader.loadObject(demo);
-// renderJSON(loader);
-
 let pasteArea = document.querySelector("#paste");
 pasteArea.addEventListener("change", (ev) => {
     renderJsonStr(pasteArea.value);
@@ -389,3 +392,7 @@ filePicker.addEventListener("change", (ev) => {
     renderJsonFile(filePicker.files[0]);
     filePicker.value = "";
 })
+
+let loader = new WebDataLoader();
+loader.loadObject(welcome);
+renderJSON(loader);
