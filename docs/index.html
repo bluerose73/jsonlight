@@ -23,6 +23,22 @@
         <input type="file" class="form-control form-control-sm mb-2" id="filepicker" name="filepicker" accept=".json, .jsonl, .geojson">
       </div>
       <div>
+        <label for="jsonlpicker" class="form-label">Open JSONL file</label>
+        <input type="file" class="form-control form-control-sm mb-2" id="jsonlpicker" name="jsonlpicker" accept=".jsonl">
+      </div>
+      <div id="jsonl-controls" class="mb-2" style="display: none;">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="prev-line">‹</button>
+          <div class="flex-grow-1">
+            <div class="input-group input-group-sm">
+              <input type="number" class="form-control" id="line-input" min="1" value="1">
+              <span class="input-group-text" id="total-lines">/ 0</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="next-line">›</button>
+        </div>
+      </div>
+      <div>
         <label for="paste" , class="form-label">or paste here</label>
         <textarea class="form-control form-control-sm" id="paste" rows="10"></textarea>
       </div>

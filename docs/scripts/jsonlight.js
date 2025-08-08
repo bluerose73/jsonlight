@@ -319,6 +319,76 @@ class WebDataLoader extends DataLoader {
     }
 }
 
+class JsonlDataLoader extends DataLoader {
+    constructor() {
+        super();
+        this.lines = [];
+        this.currentLine = 0;
+    }
+
+    async loadFile(file) {
+        if (!file.name.endsWith(".jsonl")) {
+            return false;
+        }
+        
+        try {
+            let fileText = await file.text();
+            this.lines = fileText.split(/[\r\n]+/).filter(line => line.trim());
+            if (this.lines.length === 0) {
+                return false;
+            }
+            return this.loadLine(0);
+        }
+        catch (exception) {
+            return false;
+        }
+    }
+
+    loadLine(lineIndex) {
+        if (lineIndex < 0 || lineIndex >= this.lines.length) {
+            return false;
+        }
+        
+        try {
+            this.currentLine = lineIndex;
+            this.value = JSON.parse(this.lines[lineIndex]);
+            return true;
+        }
+        catch (exception) {
+            return false;
+        }
+    }
+
+    getTotalLines() {
+        return this.lines.length;
+    }
+
+    getCurrentLine() {
+        return this.currentLine;
+    }
+
+    getChild() {
+        if (this.value == null || typeof this.value != "object") return [];
+        let ret = []
+        if (Array.isArray(this.value)) {
+            for (const [i, v] of this.value.entries()) {
+                let childLoader = new WebDataLoader();
+                childLoader.loadObject(v);
+                ret.push([i, childLoader]);
+            }
+            return ret;
+        }
+        
+        // Object
+        for (const [k, v] of Object.entries(this.value)) {
+            let childLoader = new WebDataLoader();
+            childLoader.loadObject(v);
+            ret.push([k, childLoader]);
+        }
+        return ret;
+    }
+}
+
 class DesktopDataLoader extends DataLoader {
 
 }
@@ -329,6 +399,8 @@ class DesktopDataLoader extends DataLoader {
  *************************************/
 
 let g_platform = "web";
+let g_jsonlLoader = null; // Global JSONL loader for line navigation
+
 function newDataLoader() {
     if (g_platform == "web") {
         return new WebDataLoader();
@@ -379,8 +451,70 @@ async function renderJsonFile(file) {
     renderJSON(loader);
 }
 
+async function renderJsonlFile(file) {
+    document.querySelector("#view").replaceChildren();
+    
+    g_jsonlLoader = new JsonlDataLoader();
+    let success = await g_jsonlLoader.loadFile(file);
+    if (!success) {
+        displayParseError();
+        return;
+    }
+    
+    // Show JSONL controls
+    showJsonlControls();
+    updateJsonlControls();
+    renderCurrentJsonlLine();
+}
+
+function showJsonlControls() {
+    document.querySelector("#jsonl-controls").style.display = "block";
+}
+
+function hideJsonlControls() {
+    document.querySelector("#jsonl-controls").style.display = "none";
+    g_jsonlLoader = null;
+}
+
+function updateJsonlControls() {
+    if (!g_jsonlLoader) return;
+    
+    const totalLines = g_jsonlLoader.getTotalLines();
+    const currentLine = g_jsonlLoader.getCurrentLine() + 1; // 1-indexed for display
+    
+    document.querySelector("#total-lines").textContent = `/ ${totalLines}`;
+    document.querySelector("#line-input").value = currentLine;
+    document.querySelector("#line-input").max = totalLines;
+    
+    // Update button states
+    document.querySelector("#prev-line").disabled = currentLine <= 1;
+    document.querySelector("#next-line").disabled = currentLine >= totalLines;
+}
+
+function renderCurrentJsonlLine() {
+    if (!g_jsonlLoader) return;
+    
+    document.querySelector("#view").replaceChildren();
+    
+    // Create a temporary loader with the current line's data
+    let loader = new WebDataLoader();
+    loader.loadObject(g_jsonlLoader.getValue());
+    renderJSON(loader);
+}
+
+function navigateToLine(lineNumber) {
+    if (!g_jsonlLoader) return;
+    
+    const lineIndex = lineNumber - 1; // Convert to 0-indexed
+    if (g_jsonlLoader.loadLine(lineIndex)) {
+        updateJsonlControls();
+        renderCurrentJsonlLine();
+    }
+}
+
 let pasteArea = document.querySelector("#paste");
 pasteArea.addEventListener("change", (ev) => {
+    hideJsonlControls(); // Hide JSONL controls when using paste
     renderJsonStr(pasteArea.value);
 });
 if (pasteArea.value != "") {
@@ -389,9 +523,58 @@ if (pasteArea.value != "") {
 
 let filePicker = document.querySelector("#filepicker");
 filePicker.addEventListener("change", (ev) => {
+    hideJsonlControls(); // Hide JSONL controls when using regular file picker
     renderJsonFile(filePicker.files[0]);
     filePicker.value = "";
 })
+
+let jsonlPicker = document.querySelector("#jsonlpicker");
+jsonlPicker.addEventListener("change", (ev) => {
+    renderJsonlFile(jsonlPicker.files[0]);
+    jsonlPicker.value = "";
+})
+
+// JSONL navigation controls
+let prevButton = document.querySelector("#prev-line");
+prevButton.addEventListener("click", (ev) => {
+    if (g_jsonlLoader) {
+        const currentLine = g_jsonlLoader.getCurrentLine() + 1;
+        if (currentLine > 1) {
+            navigateToLine(currentLine - 1);
+        }
+    }
+});
+
+let nextButton = document.querySelector("#next-line");
+nextButton.addEventListener("click", (ev) => {
+    if (g_jsonlLoader) {
+        const currentLine = g_jsonlLoader.getCurrentLine() + 1;
+        const totalLines = g_jsonlLoader.getTotalLines();
+        if (currentLine < totalLines) {
+            navigateToLine(currentLine + 1);
+        }
+    }
+});
+
+let lineInput = document.querySelector("#line-input");
+lineInput.addEventListener("change", (ev) => {
+    if (g_jsonlLoader) {
+        const lineNumber = parseInt(lineInput.value);
+        const totalLines = g_jsonlLoader.getTotalLines();
+        if (lineNumber >= 1 && lineNumber <= totalLines) {
+            navigateToLine(lineNumber);
+        } else {
+            // Reset to current line if invalid input
+            updateJsonlControls();
+        }
+    }
+});
+
+lineInput.addEventListener("keypress", (ev) => {
+    if (ev.key === "Enter") {
+        ev.target.blur(); // Trigger change event
+    }
+});
 
 let loader = new WebDataLoader();
 loader.loadObject(welcome);
