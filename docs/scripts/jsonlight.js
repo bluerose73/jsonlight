@@ -576,6 +576,74 @@ lineInput.addEventListener("keypress", (ev) => {
     }
 });
 
+// Expand All / Collapse All functionality
+let expandAllButton = document.querySelector("#expand-all");
+expandAllButton.addEventListener("click", async (ev) => {
+    await expandAll();
+});
+
+let collapseAllButton = document.querySelector("#collapse-all");
+collapseAllButton.addEventListener("click", (ev) => {
+    collapseAll();
+});
+
+async function expandAll() {
+    let foundCollapsed = true;
+    
+    // Keep expanding until no more collapsed items are found
+    while (foundCollapsed) {
+        foundCollapsed = false;
+        const collapseButtons = document.querySelectorAll(".collapse-button");
+        
+        // Create an array of promises for all the expansions in this level
+        const expansionPromises = [];
+        
+        collapseButtons.forEach(button => {
+            const kvRoot = button.closest(".kv-root");
+            const collapseWrapper = kvRoot.querySelector(".collapse");
+            
+            // Only expand if it's currently collapsed
+            if (!collapseWrapper.classList.contains("show")) {
+                foundCollapsed = true;
+                
+                // Create a promise that resolves when the collapse is fully shown
+                const expansionPromise = new Promise((resolve) => {
+                    const onShown = () => {
+                        collapseWrapper.removeEventListener('shown.bs.collapse', onShown);
+                        resolve();
+                    };
+                    collapseWrapper.addEventListener('shown.bs.collapse', onShown);
+                    button.click();
+                });
+                
+                expansionPromises.push(expansionPromise);
+            }
+        });
+        
+        // Wait for all expansions in this level to complete before moving to the next level
+        if (expansionPromises.length > 0) {
+            await Promise.all(expansionPromises);
+        }
+    }
+}
+
+function collapseAll() {
+    const collapseButtons = document.querySelectorAll(".collapse-button");
+    collapseButtons.forEach(button => {
+        const kvRoot = button.closest(".kv-root");
+        const collapseWrapper = kvRoot.querySelector(".collapse");
+        
+        // Skip the root level collapse button (it should stay expanded)
+        // The root level button has display: none style applied
+        const isRootLevel = button.style.display === "none";
+        
+        // Only collapse if it's currently expanded and not the root level
+        if (collapseWrapper.classList.contains("show") && !isRootLevel) {
+            button.click();
+        }
+    });
+}
+
 let loader = new WebDataLoader();
 loader.loadObject(welcome);
 renderJSON(loader);
