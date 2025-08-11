@@ -525,13 +525,11 @@ let filePicker = document.querySelector("#filepicker");
 filePicker.addEventListener("change", (ev) => {
     hideJsonlControls(); // Hide JSONL controls when using regular file picker
     renderJsonFile(filePicker.files[0]);
-    filePicker.value = "";
 })
 
 let jsonlPicker = document.querySelector("#jsonlpicker");
 jsonlPicker.addEventListener("change", (ev) => {
     renderJsonlFile(jsonlPicker.files[0]);
-    jsonlPicker.value = "";
 })
 
 // JSONL navigation controls
