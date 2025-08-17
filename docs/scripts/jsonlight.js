@@ -274,10 +274,14 @@ class WebDataLoader extends DataLoader {
         console.log(jsonStr);
         try {
             this.value = JSON.parse(jsonStr);
-            return true;
+            return { success: true };
         }
         catch (exception) {
-            return false;
+            return { 
+                success: false, 
+                error: exception.message,
+                type: 'JSON Parse Error'
+            };
         }
     }
 
@@ -285,16 +289,31 @@ class WebDataLoader extends DataLoader {
         if (file.name.endsWith(".json") || file.name.endsWith(".geojson"))
             return this.loadString(await file.text());
         if (file.name.endsWith(".jsonl")) {
-            let fileText = await file.text();
-            let lines = fileText.split(/[\r\n]+/);
             try {
-                this.value = lines.filter(line => line).map((line) => JSON.parse(line));
-                return true;
+                let fileText = await file.text();
+                let lines = fileText.split(/[\r\n]+/);
+                this.value = lines.filter(line => line).map((line, index) => {
+                    try {
+                        return JSON.parse(line);
+                    } catch (exception) {
+                        throw new Error(`Line ${index + 1}: ${exception.message}`);
+                    }
+                });
+                return { success: true };
             }
             catch (exception) {
-                return false;
+                return { 
+                    success: false, 
+                    error: exception.message,
+                    type: 'JSONL Parse Error'
+                };
             }
         }
+        return { 
+            success: false, 
+            error: `Unsupported file type: ${file.name}`,
+            type: 'File Type Error'
+        };
     }
 
     getChild() {
@@ -327,35 +346,55 @@ class JsonlDataLoader extends DataLoader {
     }
 
     async loadFile(file) {
-        if (!file.name.endsWith(".jsonl")) {
-            return false;
+        if (!file.name.endsWith(".jsonl") && !file.name.endsWith(".json") && !file.name.endsWith(".geojson")) {
+            return { 
+                success: false, 
+                error: `Expected .json .jsonl .geojson file, got: ${file.name}`,
+                type: 'File Type Error'
+            };
         }
         
         try {
             let fileText = await file.text();
             this.lines = fileText.split(/[\r\n]+/).filter(line => line.trim());
             if (this.lines.length === 0) {
-                return false;
+                return { 
+                    success: false, 
+                    error: 'File is empty or contains no valid lines',
+                    type: 'JSONL File Error'
+                };
             }
             return this.loadLine(0);
         }
         catch (exception) {
-            return false;
+            return { 
+                success: false, 
+                error: exception.message,
+                type: 'File Read Error'
+            };
         }
     }
 
     loadLine(lineIndex) {
         if (lineIndex < 0 || lineIndex >= this.lines.length) {
-            return false;
+            return { 
+                success: false, 
+                error: `Line ${lineIndex + 1} is out of range (1-${this.lines.length})`,
+                type: 'Line Index Error'
+            };
         }
         
         try {
             this.currentLine = lineIndex;
             this.value = JSON.parse(this.lines[lineIndex]);
-            return true;
+            return { success: true };
         }
         catch (exception) {
-            return false;
+            return { 
+                success: false, 
+                error: `Line ${lineIndex + 1}: ${exception.message}`,
+                type: 'JSON Parse Error'
+            };
         }
     }
 
@@ -420,20 +459,30 @@ function renderJSON(loader) {
     }
 }
 
-function displayParseError() {
-    let errorMsg = document.createElement("div");
-    errorMsg.classList.add("text-danger");
-    errorMsg.innerText = "Syntax Error";
-    document.querySelector("#view").appendChild(errorMsg);
+function displayParseError(errorInfo) {
+    let errorContainer = document.createElement("div");
+    errorContainer.classList.add("alert", "alert-danger", "m-3");
+    
+    let errorTitle = document.createElement("h5");
+    errorTitle.classList.add("alert-heading");
+    errorTitle.innerText = errorInfo?.type || "Error";
+    errorContainer.appendChild(errorTitle);
+    
+    let errorMessage = document.createElement("p");
+    errorMessage.classList.add("mb-0");
+    errorMessage.innerText = errorInfo?.error || "An unknown error occurred";
+    errorContainer.appendChild(errorMessage);
+    
+    document.querySelector("#view").appendChild(errorContainer);
 }
 
 function renderJsonStr(jsonStr) {
     document.querySelector("#view").replaceChildren();
 
     let loader = newDataLoader();
-    let success = loader.loadString(jsonStr);
-    if (!success) {
-        displayParseError();
+    let result = loader.loadString(jsonStr);
+    if (!result.success) {
+        displayParseError(result);
         return;
     }
     renderJSON(loader);
@@ -443,9 +492,9 @@ async function renderJsonFile(file) {
     document.querySelector("#view").replaceChildren();
 
     let loader = newDataLoader();
-    let success = await loader.loadFile(file);
-    if (!success) {
-        displayParseError();
+    let result = await loader.loadFile(file);
+    if (!result.success) {
+        displayParseError(result);
         return;
     }
     renderJSON(loader);
@@ -455,9 +504,9 @@ async function renderJsonlFile(file) {
     document.querySelector("#view").replaceChildren();
     
     g_jsonlLoader = new JsonlDataLoader();
-    let success = await g_jsonlLoader.loadFile(file);
-    if (!success) {
-        displayParseError();
+    let result = await g_jsonlLoader.loadFile(file);
+    if (!result.success) {
+        displayParseError(result);
         return;
     }
     
@@ -506,9 +555,29 @@ function navigateToLine(lineNumber) {
     if (!g_jsonlLoader) return;
     
     const lineIndex = lineNumber - 1; // Convert to 0-indexed
-    if (g_jsonlLoader.loadLine(lineIndex)) {
+    let result = g_jsonlLoader.loadLine(lineIndex);
+    if (result.success) {
         updateJsonlControls();
         renderCurrentJsonlLine();
+    } else {
+        // Display error in a temporary alert
+        let errorAlert = document.createElement("div");
+        errorAlert.classList.add("alert", "alert-warning", "alert-dismissible", "fade", "show", "m-2");
+        errorAlert.innerHTML = `
+            <strong>Navigation Error:</strong> ${result.error}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector("#view").insertBefore(errorAlert, document.querySelector("#view").firstChild);
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            if (errorAlert.parentNode) {
+                errorAlert.parentNode.removeChild(errorAlert);
+            }
+        }, 3000);
+        
+        // Reset input to current line
+        updateJsonlControls();
     }
 }
 
