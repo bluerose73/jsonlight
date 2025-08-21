@@ -434,6 +434,27 @@ class DesktopDataLoader extends DataLoader {
 
 
 /*************************************
+ *           File Name Display       *
+ *************************************/
+
+function updateFileNameDisplay(fileName) {
+    const fileNameElement = document.querySelector("#file-name-display");
+    if (fileName) {
+        fileNameElement.textContent = fileName;
+        fileNameElement.title = fileName; // Show full name on hover
+        fileNameElement.style.display = "block";
+    } else {
+        fileNameElement.textContent = "No file selected";
+        fileNameElement.title = "";
+        fileNameElement.style.display = "none";
+    }
+}
+
+function clearFileNameDisplay() {
+    updateFileNameDisplay(null);
+}
+
+/*************************************
  *           Controls                *
  *************************************/
 
@@ -584,6 +605,7 @@ function navigateToLine(lineNumber) {
 let pasteArea = document.querySelector("#paste");
 pasteArea.addEventListener("change", (ev) => {
     hideJsonlControls(); // Hide JSONL controls when using paste
+    clearFileNameDisplay(); // Clear file name when using paste
     renderJsonStr(pasteArea.value);
 });
 if (pasteArea.value != "") {
@@ -593,12 +615,22 @@ if (pasteArea.value != "") {
 let filePicker = document.querySelector("#filepicker");
 filePicker.addEventListener("change", (ev) => {
     hideJsonlControls(); // Hide JSONL controls when using regular file picker
-    renderJsonFile(filePicker.files[0]);
+    if (filePicker.files[0]) {
+        updateFileNameDisplay(filePicker.files[0].name);
+        renderJsonFile(filePicker.files[0]);
+    } else {
+        clearFileNameDisplay();
+    }
 })
 
 let jsonlPicker = document.querySelector("#jsonlpicker");
 jsonlPicker.addEventListener("change", (ev) => {
-    renderJsonlFile(jsonlPicker.files[0]);
+    if (jsonlPicker.files[0]) {
+        updateFileNameDisplay(jsonlPicker.files[0].name);
+        renderJsonlFile(jsonlPicker.files[0]);
+    } else {
+        clearFileNameDisplay();
+    }
 })
 
 // JSONL navigation controls
