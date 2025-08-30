@@ -181,7 +181,10 @@ function renderRawString(kvRoot) {
 
     let rawString = document.createElement("pre");
     rawString.classList.add("raw-string", "mb-1");
-    rawString.innerText = kvRoot.loader.getValue();
+
+    // The last trailing new line is not rendered by the browser.
+    // Fix it by appending an extra newline character.
+    rawString.textContent = kvRoot.loader.getValue() + "\n";
     kvRoot.appendChild(rawString);
 }
 
