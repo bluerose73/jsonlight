@@ -442,14 +442,18 @@ class DesktopDataLoader extends DataLoader {
 
 function updateFileNameDisplay(fileName) {
     const fileNameElement = document.querySelector("#file-name-display");
+    if (!fileNameElement) return;
+
     if (fileName) {
         fileNameElement.textContent = fileName;
         fileNameElement.title = fileName; // Show full name on hover
-        fileNameElement.style.display = "block";
+        fileNameElement.classList.remove("d-none");
+        fileNameElement.setAttribute("aria-hidden", "false");
     } else {
         fileNameElement.textContent = "No file selected";
         fileNameElement.title = "";
-        fileNameElement.style.display = "none";
+        fileNameElement.classList.add("d-none");
+        fileNameElement.setAttribute("aria-hidden", "true");
     }
 }
 
@@ -541,11 +545,17 @@ async function renderJsonlFile(file) {
 }
 
 function showJsonlControls() {
-    document.querySelector("#jsonl-controls").style.display = "block";
+    const controls = document.querySelector("#jsonl-controls");
+    if (!controls) return;
+    controls.classList.remove("d-none");
+    controls.setAttribute("aria-hidden", "false");
 }
 
 function hideJsonlControls() {
-    document.querySelector("#jsonl-controls").style.display = "none";
+    const controls = document.querySelector("#jsonl-controls");
+    if (!controls) return;
+    controls.classList.add("d-none");
+    controls.setAttribute("aria-hidden", "true");
     g_jsonlLoader = null;
 }
 
