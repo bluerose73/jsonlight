@@ -4,7 +4,7 @@ use std::{
 };
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 use tauri::RunEvent;
-use tauri::{Manager, State};
+use tauri::{Emitter, Manager, State};
 
 #[derive(Default)]
 struct OpenWithState {
