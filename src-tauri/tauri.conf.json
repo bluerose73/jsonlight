@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "identifier": "io.github.bluerose73.jsonlight",
   "build": {
-    "frontendDist": ".."
+    "frontendDist": "../docs"
   },
   "app": {
     "windows": [
@@ -24,10 +24,10 @@
     "active": true,
     "targets": "all",
     "icon": [
-      "../icon/favicon-32x32.png",
-      "../icon/android-chrome-192x192.png",
-      "../icon/android-chrome-512x512.png",
-      "../icon/favicon.ico"
+      "../docs/icon/favicon-32x32.png",
+      "../docs/icon/android-chrome-192x192.png",
+      "../docs/icon/android-chrome-512x512.png",
+      "../docs/icon/favicon.ico"
     ],
     "fileAssociations": [
       {
