@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "JSON Light",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "io.github.bluerose73.jsonlight",
   "build": {
     "frontendDist": ".."
   },
@@ -10,8 +10,8 @@
     "windows": [
       {
         "title": "JSON Light",
-        "width": 800,
-        "height": 600,
+        "width": 1280,
+        "height": 800,
         "resizable": true,
         "fullscreen": false
       }
@@ -28,6 +28,35 @@
       "../icon/android-chrome-192x192.png",
       "../icon/android-chrome-512x512.png",
       "../icon/favicon.ico"
-    ]
+    ],
+    "fileAssociations": [
+      {
+        "name": "JSON Light Document",
+        "description": "JSON file",
+        "ext": ["json"],
+        "mimeType": "application/json",
+        "role": "Editor",
+        "rank": "Owner"
+      },
+      {
+        "name": "JSON Light GeoJSON Document",
+        "description": "GeoJSON file",
+        "ext": ["geojson"],
+        "mimeType": "application/geo+json",
+        "role": "Editor",
+        "rank": "Owner"
+      },
+      {
+        "name": "JSON Light JSONL Document",
+        "description": "JSON Lines file",
+        "ext": ["jsonl"],
+        "mimeType": "application/x-jsonlines",
+        "role": "Editor",
+        "rank": "Owner"
+      }
+    ],
+    "windows": {
+      "nsis": {}
+    }
   }
 }

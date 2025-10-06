@@ -93,6 +93,27 @@
     </div>
 
     <script src="scripts/bootstrap.bundle.min.js"></script>
+    <script type="module">
+      // Import Tauri API if running in Tauri context
+      if (window.__TAURI__) {
+        import('https://cdn.jsdelivr.net/npm/@tauri-apps/api@2/event').then(module => {
+          const { listen } = module;
+          
+          // Listen for "open-with" events from Rust backend
+          listen('open-with', (event) => {
+            console.log('Open with files:', event.payload);
+            const files = event.payload;
+            
+            if (files && files.length > 0) {
+              const file = files[0]; // Handle first file for now
+              handleOpenWithFile(file.path, file.mode);
+            }
+          });
+        }).catch(err => {
+          console.log('Tauri API not available:', err);
+        });
+      }
+    </script>
     <script src="scripts/jsonlight.js"></script>
   </main>
 </body>

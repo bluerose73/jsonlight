@@ -746,6 +746,43 @@ function collapseAll() {
     });
 }
 
+// Handle "open with" functionality from Tauri
+async function handleOpenWithFile(filePath, mode) {
+    try {
+        console.log(`Opening file: ${filePath} in ${mode} mode`);
+        
+        // Use Tauri's fs API to read the file
+        if (window.__TAURI__) {
+            const { readTextFile } = await import('https://cdn.jsdelivr.net/npm/@tauri-apps/api@2/fs');
+            const fileContent = await readTextFile(filePath);
+            const fileName = filePath.split(/[\\/]/).pop(); // Extract filename from path
+            
+            // Update file name display
+            updateFileNameDisplay(fileName);
+            
+            if (mode === 'jsonl') {
+                // Create a temporary blob to simulate a file for JSONL processing
+                const blob = new Blob([fileContent], { type: 'text/plain' });
+                const file = new File([blob], fileName, { type: 'text/plain' });
+                await renderJsonlFile(file);
+            } else {
+                // JSON mode (includes .json and .geojson)
+                hideJsonlControls();
+                renderJsonStr(fileContent);
+            }
+        }
+    } catch (error) {
+        console.error('Error opening file:', error);
+        
+        // Display error to user
+        document.querySelector("#view").replaceChildren();
+        displayParseError({
+            type: 'File Open Error',
+            error: `Failed to open file: ${error.message}`
+        });
+    }
+}
+
 let loader = new WebDataLoader();
 loader.loadObject(welcome);
 renderJSON(loader);
