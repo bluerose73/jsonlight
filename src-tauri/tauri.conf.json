@@ -1,0 +1,33 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "JSON Light",
+  "version": "0.1.0",
+  "identifier": "com.tauri.dev",
+  "build": {
+    "frontendDist": ".."
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "JSON Light",
+        "width": 800,
+        "height": 600,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "../icon/favicon-32x32.png",
+      "../icon/android-chrome-192x192.png",
+      "../icon/android-chrome-512x512.png",
+      "../icon/favicon.ico"
+    ]
+  }
+}
