@@ -96,19 +96,63 @@
     <script type="module">
       // Import Tauri API if running in Tauri context
       if (window.__TAURI__) {
-        import('https://cdn.jsdelivr.net/npm/@tauri-apps/api@2/event').then(module => {
-          const { listen } = module;
-          
+        Promise.all([
+          import('https://cdn.jsdelivr.net/npm/@tauri-apps/api@2/event'),
+          import('https://cdn.jsdelivr.net/npm/@tauri-apps/api@2/core')
+        ]).then(([eventModule, coreModule]) => {
+          const { listen } = eventModule;
+          const { invoke } = coreModule;
+
+          const processedPaths = window.__JSONLIGHT_OPENED_PATHS ?? new Set();
+          window.__JSONLIGHT_OPENED_PATHS = processedPaths;
+
+          const queue = window.__JSONLIGHT_OPEN_WITH_QUEUE ?? [];
+          window.__JSONLIGHT_OPEN_WITH_QUEUE = queue;
+
+          async function drainQueue() {
+            if (typeof window.handleOpenWithFile !== 'function') {
+              return;
+            }
+
+            while (queue.length > 0) {
+              const file = queue.shift();
+              if (!file || !file.path || processedPaths.has(file.path)) {
+                continue;
+              }
+
+              processedPaths.add(file.path);
+              try {
+                await window.handleOpenWithFile(file.path, file.mode);
+              } catch (error) {
+                console.error('Error handling open-with file:', error);
+              }
+            }
+          }
+
+          window.__JSONLIGHT_DRAIN_OPEN_WITH_QUEUE = drainQueue;
+
+          function enqueueFiles(files = []) {
+            if (!Array.isArray(files)) {
+              return;
+            }
+
+            queue.push(...files);
+            drainQueue();
+          }
+
           // Listen for "open-with" events from Rust backend
           listen('open-with', (event) => {
-            console.log('Open with files:', event.payload);
-            const files = event.payload;
-            
-            if (files && files.length > 0) {
-              const file = files[0]; // Handle first file for now
-              handleOpenWithFile(file.path, file.mode);
-            }
+            enqueueFiles(event.payload || []);
           });
+
+          // Retrieve any pending files that were queued before the frontend was ready
+          invoke('get_pending_open_with_files')
+            .then((files) => {
+              enqueueFiles(files);
+            })
+            .catch(err => {
+              console.error('Failed to retrieve pending open-with files:', err);
+            });
         }).catch(err => {
           console.log('Tauri API not available:', err);
         });

@@ -750,7 +750,7 @@ function collapseAll() {
 async function handleOpenWithFile(filePath, mode) {
     try {
         console.log(`Opening file: ${filePath} in ${mode} mode`);
-        
+
         // Use Tauri's fs API to read the file
         if (window.__TAURI__) {
             const { readTextFile } = await import('https://cdn.jsdelivr.net/npm/@tauri-apps/api@2/fs');
@@ -783,6 +783,14 @@ async function handleOpenWithFile(filePath, mode) {
     }
 }
 
+if (typeof window !== 'undefined') {
+    window.handleOpenWithFile = handleOpenWithFile;
+}
+
 let loader = new WebDataLoader();
 loader.loadObject(welcome);
 renderJSON(loader);
+
+if (typeof window !== 'undefined' && typeof window.__JSONLIGHT_DRAIN_OPEN_WITH_QUEUE === 'function') {
+    window.__JSONLIGHT_DRAIN_OPEN_WITH_QUEUE();
+}
