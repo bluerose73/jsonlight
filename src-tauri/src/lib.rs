@@ -54,10 +54,10 @@ fn queue_open_with_files(app: &tauri::AppHandle, files: Vec<OpenWithFile>) {
 
     if let Some(state) = app.try_state::<OpenWithState>() {
         let mut pending = state.pending.lock().expect("open-with mutex poisoned");
-        pending.extend(files.clone());
+        pending.extend(files.iter().cloned());
     }
 
-    if let Err(err) = app.emit_all("open-with", &files) {
+    if let Err(err) = app.emit("open-with", files) {
         log::error!("Failed to emit open-with event: {err}");
     }
 }
