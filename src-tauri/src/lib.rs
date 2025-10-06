@@ -2,7 +2,9 @@ use std::{
     path::{Path, PathBuf},
     sync::Mutex,
 };
-use tauri::{Emitter, RunEvent, State};
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+use tauri::RunEvent;
+use tauri::{Manager, State};
 
 #[derive(Default)]
 struct OpenWithState {
